@@ -18,7 +18,7 @@ function Login() {
   return (
     <div className="login-container">
       <div className="login-box">
-        <h1>College Attendance System</h1>
+        <h1>CLASS ALTER SYSTEM</h1>
         <form onSubmit={handleLogin}>
           <div className="form-group">
             <label htmlFor="email">Email:</label>

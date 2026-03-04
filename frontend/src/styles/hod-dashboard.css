@@ -1,0 +1,110 @@
+/* HOD Dashboard - Minimal White & Grey Theme */
+
+.hod-dashboard {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+/* Navbar */
+.hod-navbar {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 15px 30px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hod-navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.hod-logo {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+}
+
+.hod-navbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.hod-navbar-right h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
+}
+
+/* Body Container */
+.hod-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Main Section (70%) */
+.hod-main-section {
+  flex: 0 0 70%;
+  background-color: #ffffff;
+  border-right: 1px solid #e0e0e0;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+/* Side Section (30%) */
+.hod-side-section {
+  flex: 0 0 30%;
+  background-color: #f5f5f5;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+/* Scrollbar styling */
+.hod-main-section::-webkit-scrollbar,
+.hod-side-section::-webkit-scrollbar {
+  width: 8px;
+}
+
+.hod-main-section::-webkit-scrollbar-track,
+.hod-side-section::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hod-main-section::-webkit-scrollbar-thumb,
+.hod-side-section::-webkit-scrollbar-thumb {
+  background-color: #d0d0d0;
+  border-radius: 4px;
+}
+
+.hod-main-section::-webkit-scrollbar-thumb:hover,
+.hod-side-section::-webkit-scrollbar-thumb:hover {
+  background-color: #b0b0b0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hod-body {
+    flex-direction: column;
+  }
+
+  .hod-main-section {
+    flex: 0 0 auto;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .hod-side-section {
+    flex: 0 0 auto;
+  }
+
+  .hod-navbar h1 {
+    font-size: 24px;
+  }
+}
