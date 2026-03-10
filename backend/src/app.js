@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { pool } from "./config/db.js";
+import hodRoutes from "./routes/hod.routes.js";
 
 const app = express();
 app.use(cors());
@@ -9,6 +10,9 @@ app.use(express.json());
 app.get("/health", (_, res) => {
   res.json({ status: "OK" });
 });
+
+// HOD routes
+app.use("/api/hod", hodRoutes);
 
 // Test database connection
 app.get("/api/db-test", async (_, res) => {

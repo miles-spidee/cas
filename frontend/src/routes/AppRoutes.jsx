@@ -9,7 +9,7 @@ function AppRoutes() {
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/staff-dashboard" element={<StaffDashboard />} />
-      <Route path="/hod-dashboard" element={<HODDashboard />} />
+      <Route path="/hod" element={<HODDashboard />} />
     </Routes>
   )
 }

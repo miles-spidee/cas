@@ -1,110 +1,512 @@
-/* HOD Dashboard - Minimal White & Grey Theme */
+/* ============================================
+   HOD Dashboard – Light + Blue Border Accent
+   ============================================ */
 
+/* ---------- base wrapper ---------- */
 .hod-dashboard {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #ffffff;
+  background: #f4f6f9;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: #1a1a2e;
 }
 
-/* Navbar */
-.hod-navbar {
-  background-color: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
-  padding: 15px 30px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+/* ---------- header bar ---------- */
+.hod-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 36px;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(74, 144, 217, 0.15);
+}
+
+.hod-header__title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: #1a1a2e;
+}
+
+.hod-header__subtitle {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: rgba(26, 26, 46, 0.3);
+}
+
+/* ---------- body – two‑column layout ---------- */
+.hod-body {
+  display: flex;
+  flex: 1;
+  gap: 20px;
+  padding: 24px 28px;
+  overflow: hidden;
+}
+
+/* ---------- panels ---------- */
+.hod-panel {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid rgba(74, 144, 217, 0.18);
+  border-radius: 16px;
+  padding: 28px 30px;
+  overflow-y: auto;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.hod-panel:hover {
+  border-color: rgba(74, 144, 217, 0.35);
+  box-shadow: 0 4px 20px rgba(74, 144, 217, 0.08);
+}
+
+/* main section – 65% */
+.hod-panel--main {
+  flex: 0 0 65%;
+}
+
+/* side section – remaining */
+.hod-panel--side {
+  flex: 1;
+}
+
+/* ---------- panel headings ---------- */
+.hod-panel__heading {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: #1a1a2e;
+  position: relative;
+  padding-bottom: 12px;
+}
+
+.hod-panel__heading::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 42px;
+  height: 3px;
+  border-radius: 3px;
+  background: #4a90d9;
+}
+
+/* ---------- custom scrollbar ---------- */
+.hod-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.hod-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hod-panel::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.hod-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 860px) {
+  .hod-body {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .hod-panel--main,
+  .hod-panel--side {
+    flex: 0 0 auto;
+  }
+
+  .hod-header {
+    padding: 14px 20px;
+  }
+
+  .hod-header__title {
+    font-size: 20px;
+  }
+
+  .hod-header__subtitle {
+    font-size: 11px;
+    letter-spacing: 1.2px;
+  }
+}
+
+/* ---------- status text (loading / empty) ---------- */
+.hod-status {
+  font-size: 14px;
+  color: rgba(26, 26, 46, 0.45);
+  padding: 12px 0;
+}
+
+.hod-status--error {
+  color: #d35d5d;
+}
+
+/* ---------- list wrapper ---------- */
+.hod-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ====== Affected‑class card ====== */
+.hod-card {
+  border: 1px solid rgba(74, 144, 217, 0.14);
+  border-radius: 12px;
+  padding: 16px 18px;
+  background: #fafbfd;
+  cursor: pointer;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+}
+
+.hod-card:hover {
+  border-color: rgba(74, 144, 217, 0.35);
+  box-shadow: 0 2px 10px rgba(74, 144, 217, 0.07);
+}
+
+.hod-card--selected {
+  border-color: #4a90d9;
+  background: rgba(74, 144, 217, 0.06);
+  box-shadow: 0 2px 12px rgba(74, 144, 217, 0.12);
+}
+
+.hod-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.hod-card__class {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.hod-card__time {
+  font-size: 12px;
+  font-weight: 500;
+  color: #4a90d9;
+  background: rgba(74, 144, 217, 0.08);
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.2px;
+}
+
+.hod-card__bottom {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.hod-navbar-left {
+.hod-card__subject {
+  font-size: 13px;
+  color: rgba(26, 26, 46, 0.55);
+}
+
+.hod-card__teacher {
   display: flex;
   align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #c0392b;
 }
 
-.hod-logo {
-  height: 50px;
-  width: auto;
-  object-fit: contain;
+.hod-card__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c0392b;
+  flex-shrink: 0;
 }
 
-.hod-navbar-right {
+/* ====== Assignment badge inside card ====== */
+.hod-card__assignment {
   display: flex;
   align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(46, 204, 113, 0.06);
+  border: 1px solid rgba(46, 204, 113, 0.18);
 }
 
-.hod-navbar-right h1 {
-  margin: 0;
-  font-size: 28px;
+.hod-card__assign-icon {
+  font-size: 14px;
+  color: #27ae60;
+  flex-shrink: 0;
+}
+
+.hod-card__assign-name {
+  font-size: 13px;
   font-weight: 600;
-  color: #1a1a1a;
-  letter-spacing: -0.5px;
-}
-
-/* Body Container */
-.hod-body {
-  display: flex;
+  color: #1a1a2e;
   flex: 1;
-  overflow: hidden;
 }
 
-/* Main Section (70%) */
-.hod-main-section {
-  flex: 0 0 70%;
-  background-color: #ffffff;
-  border-right: 1px solid #e0e0e0;
-  padding: 30px;
-  overflow-y: auto;
+.hod-card__assign-status {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 20px;
+  flex-shrink: 0;
 }
 
-/* Side Section (30%) */
-.hod-side-section {
-  flex: 0 0 30%;
-  background-color: #f5f5f5;
-  padding: 30px;
-  overflow-y: auto;
+.hod-card__assign-status--pending {
+  background: rgba(243, 156, 18, 0.1);
+  color: #e67e22;
 }
 
-/* Scrollbar styling */
-.hod-main-section::-webkit-scrollbar,
-.hod-side-section::-webkit-scrollbar {
-  width: 8px;
+.hod-card__assign-status--approved,
+.hod-card__assign-status--auto_approved {
+  background: rgba(46, 204, 113, 0.1);
+  color: #27ae60;
 }
 
-.hod-main-section::-webkit-scrollbar-track,
-.hod-side-section::-webkit-scrollbar-track {
-  background: transparent;
+.hod-card__assign-status--modified {
+  background: rgba(74, 144, 217, 0.1);
+  color: #4a90d9;
 }
 
-.hod-main-section::-webkit-scrollbar-thumb,
-.hod-side-section::-webkit-scrollbar-thumb {
-  background-color: #d0d0d0;
-  border-radius: 4px;
+.hod-card__assign-status--rejected {
+  background: rgba(211, 93, 93, 0.1);
+  color: #c0392b;
 }
 
-.hod-main-section::-webkit-scrollbar-thumb:hover,
-.hod-side-section::-webkit-scrollbar-thumb:hover {
-  background-color: #b0b0b0;
+/* Card with assignment gets a green left accent */
+.hod-card--assigned {
+  border-left: 3px solid #27ae60;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .hod-body {
-    flex-direction: column;
-  }
+/* ====== Absent‑staff row ====== */
+.hod-staff-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(74, 144, 217, 0.14);
+  border-radius: 12px;
+  background: #fafbfd;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
 
-  .hod-main-section {
-    flex: 0 0 auto;
-    border-right: none;
-    border-bottom: 1px solid #e0e0e0;
-  }
+.hod-staff-row:hover {
+  border-color: rgba(74, 144, 217, 0.35);
+  box-shadow: 0 2px 10px rgba(74, 144, 217, 0.07);
+}
 
-  .hod-side-section {
-    flex: 0 0 auto;
-  }
+.hod-staff-row__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(74, 144, 217, 0.12);
+  color: #4a90d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
 
-  .hod-navbar h1 {
-    font-size: 24px;
-  }
+.hod-staff-row__name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a2e;
+}
+
+/* ====== Heading row with close button ====== */
+.hod-panel__heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+
+.hod-panel__heading-row .hod-panel__heading {
+  margin-bottom: 0;
+}
+
+.hod-close-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background: #fafbfd;
+  color: #1a1a2e;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.hod-close-btn:hover {
+  background: rgba(74, 144, 217, 0.08);
+  border-color: rgba(74, 144, 217, 0.3);
+}
+
+/* ====== Swap context (selected class info) ====== */
+.hod-swap-context {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  margin: 16px 0;
+  border: 1px solid rgba(74, 144, 217, 0.18);
+  border-radius: 12px;
+  background: rgba(74, 144, 217, 0.04);
+}
+
+.hod-swap-context__class {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.hod-swap-context__meta {
+  font-size: 12px;
+  color: rgba(26, 26, 46, 0.5);
+}
+
+.hod-swap-context__absent {
+  font-size: 12px;
+  font-weight: 500;
+  color: #c0392b;
+  margin-top: 2px;
+}
+
+/* ====== Swap‑candidate row ====== */
+.hod-candidate-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(74, 144, 217, 0.14);
+  border-radius: 12px;
+  background: #fafbfd;
+  cursor: pointer;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+}
+
+.hod-candidate-row:hover {
+  border-color: rgba(74, 144, 217, 0.35);
+  box-shadow: 0 2px 10px rgba(74, 144, 217, 0.07);
+}
+
+/* Picked / selected candidate */
+.hod-candidate-row--picked {
+  border-color: #27ae60;
+  background: rgba(46, 204, 113, 0.05);
+  box-shadow: 0 2px 12px rgba(46, 204, 113, 0.10);
+}
+
+.hod-candidate-row__check {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #27ae60;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.hod-candidate-row__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(46, 204, 113, 0.12);
+  color: #27ae60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.hod-candidate-row__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hod-candidate-row__name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a2e;
+}
+
+.hod-candidate-row__free {
+  font-size: 12px;
+  color: #27ae60;
+  font-weight: 500;
+}
+
+/* ★ Recommended badge */
+.hod-candidate-row__badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: #e67e22;
+  background: rgba(243, 156, 18, 0.1);
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* ====== Confirm assign button ====== */
+.hod-confirm-btn {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  padding: 13px 20px;
+  border: none;
+  border-radius: 12px;
+  background: #27ae60;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.hod-confirm-btn:hover:not(:disabled) {
+  background: #219a52;
+  box-shadow: 0 4px 16px rgba(39, 174, 96, 0.25);
+  transform: translateY(-1px);
+}
+
+.hod-confirm-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.hod-confirm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
