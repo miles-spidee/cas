@@ -17,7 +17,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 36px;
+  padding: 8px 36px;
   background: #ffffff;
   border-bottom: 1px solid rgba(74, 144, 217, 0.15);
 }
@@ -30,12 +30,103 @@
   color: #1a1a2e;
 }
 
+.hod-header__logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  margin-right: auto;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  /* border: 1px solid red; Placeholder for debugging logo size/position */
+}
+
+.hod-header__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hod-header__right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hod-header__user {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.hod-header__dept {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(26, 26, 46, 0.5);
+  letter-spacing: 0.4px;
+}
+
+.hod-header__logout {
+  padding: 6px 16px;
+  background: rgba(74, 144, 217, 0.08);
+  color: #4a90d9;
+  border: 1px solid rgba(74, 144, 217, 0.22);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.hod-header__logout:hover {
+  background: #4a90d9;
+  color: #fff;
+  border-color: #4a90d9;
+}
+
 .hod-header__subtitle {
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 1.6px;
   text-transform: uppercase;
   color: rgba(26, 26, 46, 0.3);
+}
+
+/* ---------- info bar (date & time) ---------- */
+.hod-info-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 36px;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(74, 144, 217, 0.1);
+  font-size: 13px;
+}
+
+.hod-info-bar__label {
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.hod-info-bar__date {
+  color: rgba(26, 26, 46, 0.7);
+  font-weight: 500;
+}
+
+.hod-info-bar__time {
+  color: #4a90d9;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.3px;
+}
+
+.hod-info-bar__title {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: rgba(26, 26, 46, 0.4);
 }
 
 /* ---------- body – two‑column layout ---------- */
@@ -292,6 +383,94 @@
   border-left: 3px solid #27ae60;
 }
 
+/* ====== Completed card – faded & pushed down ====== */
+.hod-card--completed {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: default;
+  background: #f0f1f3;
+  border-color: rgba(0, 0, 0, 0.06);
+  border-left-color: rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+
+.hod-card--completed:hover {
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: none;
+}
+
+.hod-card--completed .hod-card__time {
+  color: rgba(26, 26, 46, 0.35);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.hod-card--completed .hod-card__teacher {
+  color: rgba(26, 26, 46, 0.35);
+}
+
+.hod-card--completed .hod-card__dot {
+  background: rgba(26, 26, 46, 0.25);
+}
+
+.hod-card__completed-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: rgba(26, 26, 46, 0.25);
+  background: rgba(0, 0, 0, 0.04);
+  padding: 4px 12px;
+  border-radius: 20px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ====== Ongoing card – subtle pulse ring ====== */
+.hod-card--ongoing {
+  border-color: #4a90d9;
+  background: rgba(74, 144, 217, 0.03);
+}
+
+.hod-card__live-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #27ae60;
+  margin-left: 8px;
+  vertical-align: middle;
+  animation: live-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.5); }
+  50%      { opacity: 0.6; box-shadow: 0 0 0 6px rgba(39, 174, 96, 0); }
+}
+
+/* ====== Approval badge ====== */
+.hod-card__approval-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+.hod-card__approval-badge--auto {
+  background: rgba(155, 89, 182, 0.1);
+  color: #8e44ad;
+}
+
+.hod-card__approval-badge--hod {
+  background: rgba(74, 144, 217, 0.1);
+  color: #2c6fbb;
+}
+
 /* ====== Absent‑staff row ====== */
 .hod-staff-row {
   display: flex;
@@ -391,6 +570,31 @@
   font-weight: 500;
   color: #c0392b;
   margin-top: 2px;
+}
+
+/* ====== Search bar ====== */
+.hod-search {
+  width: 100%;
+  padding: 10px 14px 10px 36px;
+  margin: 14px 0 6px;
+  border: 1px solid rgba(74, 144, 217, 0.2);
+  border-radius: 10px;
+  background: #fafbfd url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%234a90d9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cline x1='11' y1='11' x2='15' y2='15'/%3E%3C/svg%3E") no-repeat 12px center;
+  font-size: 13px;
+  font-family: inherit;
+  color: #1a1a2e;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  box-sizing: border-box;
+}
+
+.hod-search::placeholder {
+  color: rgba(26, 26, 46, 0.35);
+}
+
+.hod-search:focus {
+  border-color: #4a90d9;
+  box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.1);
 }
 
 /* ====== Swap‑candidate row ====== */

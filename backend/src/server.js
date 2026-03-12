@@ -1,6 +1,7 @@
 import "dotenv/config";
 import app from "./app.js";
 import { pool, checkConnection } from "./config/db.js";
+import { startCronJobs } from "./jobs/cronScheduler.js";
 
 const PORT = process.env.PORT || 5000;
 
@@ -30,5 +31,8 @@ const testDbConnection = async () => {
 
 app.listen(PORT, async () => {
   console.log(`Backend running on port ${PORT}`);
-  await testDbConnection();
+  const dbOk = await testDbConnection();
+  if (dbOk) {
+    startCronJobs();
+  }
 });

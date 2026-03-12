@@ -5,66 +5,107 @@ const router = Router();
 
 /**
  * GET /api/hod/absent-staff
- * Returns staff who have NO attendance record for today
+ * Returns staff whose current_status is ABSENT in staff_status table
+ * Scoped to the logged-in HOD's department
  */
 router.get("/absent-staff", async (req, res) => {
   try {
-    const dept = req.query.department_id;
+    const dept = req.user.department_id;
 
-    let query;
-    let params;
+    // First check if staff_status has been populated at all
+    const statusCountResult = await pool.query(
+      `SELECT COUNT(*) as count FROM staff_status`
+    );
+    const hasStatusData = parseInt(statusCountResult.rows[0].count, 10) > 0;
 
-    if (dept) {
-      query = `
-        SELECT s.id, s.name
-        FROM staff s
-        WHERE s.department_id = $1
-          AND NOT EXISTS (
-            SELECT 1
-            FROM attendance a
-            WHERE a.staff_id = s.id
-              AND a.date = CURRENT_DATE
-          )
-        ORDER BY s.name
-      `;
-      params = [dept];
-    } else {
-      query = `
-        SELECT s.id, s.name
-        FROM staff s
-        WHERE NOT EXISTS (
-          SELECT 1
-          FROM attendance a
-          WHERE a.staff_id = s.id
-            AND a.date = CURRENT_DATE
-        )
-        ORDER BY s.name
-      `;
-      params = [];
+    if (!hasStatusData) {
+      return res.json({
+        rows: [],
+        message: "Staff status not yet computed — waiting for cron refresh"
+      });
     }
 
-    const result = await pool.query(query, params);
-    res.json(result.rows);
+    // Check if everyone in this dept is ABSENT (meaning attendance hasn't been taken yet)
+    const absentCountResult = await pool.query(
+      `SELECT
+         COUNT(*) FILTER (WHERE ss.current_status = 'ABSENT') AS absent_count,
+         COUNT(*) AS total_count
+       FROM staff_status ss
+       JOIN staff s ON s.id = ss.staff_id
+       WHERE s.is_active = true AND s.department_id = $1`,
+      [dept]
+    );
+    const { absent_count, total_count } = absentCountResult.rows[0];
+    if (parseInt(absent_count, 10) === parseInt(total_count, 10) && parseInt(total_count, 10) > 0) {
+      return res.json({
+        rows: [],
+        message: "Attendance not yet recorded for today"
+      });
+    }
+
+    const query = `
+      SELECT s.id, s.name, ss.current_status
+      FROM staff s
+      JOIN staff_status ss ON ss.staff_id = s.id
+      WHERE s.department_id = $1
+        AND ss.current_status = 'ABSENT'
+      ORDER BY s.name
+    `;
+
+    const result = await pool.query(query, [dept]);
+    res.json({ rows: result.rows });
   } catch (error) {
     console.error("Error fetching absent staff:", error);
-    res.status(500).json({ error: "Failed to fetch absent staff" });
+    res.status(500).json({ error: "Failed to fetch absent staff", detail: error.message });
   }
 });
 
 /**
- * GET /api/hod/affected-classes
- * Returns timetable entries for today whose assigned staff are absent
+ * POST /api/hod/generate-alter-requests
+ * Auto-creates PENDING alter_requests for all affected classes today.
+ * Uses ON CONFLICT to skip classes that already have an alter_request.
  */
-router.get("/affected-classes", async (req, res) => {
+router.post("/generate-alter-requests", async (req, res) => {
   try {
+    // Guard: only generate alter_requests if attendance has been taken today.
+    // If zero attendance records exist, we can't know who's absent yet.
+    const attendanceCheck = await pool.query(
+      `SELECT COUNT(*) AS count FROM attendance WHERE date = CURRENT_DATE`
+    );
+    const attendanceCount = parseInt(attendanceCheck.rows[0].count, 10);
+    if (attendanceCount === 0) {
+      return res.json({
+        message: "Attendance not yet recorded — skipping alter request generation",
+        inserted: 0,
+      });
+    }
+
     const query = `
+      INSERT INTO alter_requests (
+        id,
+        absent_staff_id,
+        class_name,
+        subject,
+        class_date,
+        start_time,
+        end_time,
+        department_id,
+        status,
+        created_at,
+        expires_at
+      )
       SELECT
+        gen_random_uuid(),
+        t.staff_id,
         t.class_name,
         t.subject,
+        CURRENT_DATE,
         t.start_time,
         t.end_time,
-        s.id AS absent_staff_id,
-        s.name AS absent_teacher
+        s.department_id,
+        'PENDING',
+        NOW(),
+        NOW() + INTERVAL '15 minutes'
       FROM timetable t
       JOIN staff s ON s.id = t.staff_id
       WHERE t.day_of_week = EXTRACT(DOW FROM CURRENT_DATE)
@@ -74,10 +115,72 @@ router.get("/affected-classes", async (req, res) => {
           WHERE a.staff_id = t.staff_id
             AND a.date = CURRENT_DATE
         )
-      ORDER BY t.start_time
+      ON CONFLICT (class_name, class_date, start_time) DO NOTHING
     `;
 
     const result = await pool.query(query);
+    res.json({
+      message: "Alter requests generated",
+      inserted: result.rowCount,
+    });
+  } catch (error) {
+    console.error("Error generating alter requests:", error);
+    res.status(500).json({ error: "Failed to generate alter requests", detail: error.message });
+  }
+});
+
+/**
+ * GET /api/hod/affected-classes
+ * Returns today's alter_requests with absent teacher info and assigned swap (if any)
+ * Scoped to the logged-in HOD's department
+ */
+router.get("/affected-classes", async (req, res) => {
+  try {
+    const dept = req.user.department_id;
+
+    const query = `
+      SELECT
+        ar.id AS alter_request_id,
+        ar.class_name,
+        ar.subject,
+        ar.start_time,
+        ar.end_time,
+        ar.absent_staff_id,
+        sa.name AS absent_teacher,
+        ar.status,
+        ar.recommended_staff_id,
+        sr.name AS assigned_staff_name,
+        ar.expires_at,
+        -- live period status based on current time
+        CASE
+          WHEN ar.end_time <= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')::time THEN 'COMPLETED'
+          WHEN ar.start_time <= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')::time AND ar.end_time > (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')::time THEN 'ONGOING'
+          ELSE 'UPCOMING'
+        END AS period_status,
+        -- how was the assignment approved
+        CASE
+          WHEN ar.status = 'AUTO_APPROVED' THEN 'Auto'
+          WHEN ar.status IN ('APPROVED', 'MODIFIED') THEN 'HOD'
+          ELSE NULL
+        END AS approval_method,
+        approver.name AS approved_by_name
+      FROM alter_requests ar
+      JOIN staff sa ON sa.id = ar.absent_staff_id
+      LEFT JOIN staff sr ON sr.id = ar.recommended_staff_id
+      LEFT JOIN staff approver ON approver.id = ar.approved_by
+      WHERE ar.class_date = CURRENT_DATE
+        AND ar.department_id = $1
+      ORDER BY
+        CASE
+          WHEN ar.end_time <= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')::time THEN 2
+          WHEN ar.start_time <= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')::time AND ar.end_time > (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')::time THEN 0
+          ELSE 1
+        END,
+        ar.start_time,
+        ar.class_name
+    `;
+
+    const result = await pool.query(query, [dept]);
     res.json(result.rows);
   } catch (error) {
     console.error("Error fetching affected classes:", error);
@@ -121,18 +224,11 @@ router.get("/swap-candidates", async (req, res) => {
           FROM staff
           WHERE id = $1
       )
-      -- Exclude staff who are absent today (no attendance record when others have checked in,
-      -- OR explicitly not checked in). We use the same logic as absent-staff endpoint.
-      AND NOT (
-          NOT EXISTS (
-            SELECT 1
-            FROM attendance a
-            WHERE a.staff_id = s.id
-              AND a.date = CURRENT_DATE
-          )
-          AND EXISTS (
-            SELECT 1 FROM attendance WHERE date = CURRENT_DATE
-          )
+      -- Exclude staff marked absent today (they appear as absent_staff_id in alter_requests)
+      AND s.id NOT IN (
+          SELECT DISTINCT ar.absent_staff_id
+          FROM alter_requests ar
+          WHERE ar.class_date = CURRENT_DATE
       )
       AND NOT EXISTS (
           SELECT 1
@@ -156,87 +252,28 @@ router.get("/swap-candidates", async (req, res) => {
 });
 
 /**
- * GET /api/hod/assignments
- * Returns today's alter-request assignments so the left panel can show who's assigned
- */
-router.get("/assignments", async (req, res) => {
-  try {
-    const query = `
-      SELECT
-        ar.id AS assignment_id,
-        ar.class_name,
-        ar.subject,
-        ar.start_time,
-        ar.end_time,
-        ar.absent_staff_id,
-        ar.recommended_staff_id,
-        ar.status,
-        s.name AS assigned_staff_name
-      FROM alter_requests ar
-      JOIN staff s ON s.id = ar.recommended_staff_id
-      WHERE ar.class_date = CURRENT_DATE
-      ORDER BY ar.start_time
-    `;
-    const result = await pool.query(query);
-    res.json(result.rows);
-  } catch (error) {
-    console.error("Error fetching assignments:", error);
-    res.status(500).json({ error: "Failed to fetch assignments" });
-  }
-});
-
-/**
  * POST /api/hod/assign-swap
  * Creates (or updates) an alter_request – assigns a swap candidate to an affected class
  */
 router.post("/assign-swap", async (req, res) => {
   try {
-    const {
-      absent_staff_id,
-      class_name,
-      subject,
-      start_time,
-      end_time,
-      recommended_staff_id,
-    } = req.body;
+    const { alter_request_id, recommended_staff_id } = req.body;
 
-    if (
-      !absent_staff_id ||
-      !class_name ||
-      !subject ||
-      !start_time ||
-      !end_time ||
-      !recommended_staff_id
-    ) {
-      return res.status(400).json({ error: "All fields are required" });
+    if (!alter_request_id || !recommended_staff_id) {
+      return res.status(400).json({ error: "alter_request_id and recommended_staff_id are required" });
     }
 
-    // Get department_id from the absent staff member
-    const deptResult = await pool.query(
-      `SELECT department_id FROM staff WHERE id = $1`,
-      [absent_staff_id]
-    );
-    if (deptResult.rows.length === 0) {
-      return res.status(404).json({ error: "Absent staff not found" });
-    }
-    const department_id = deptResult.rows[0].department_id;
-
-    // Upsert: if an assignment already exists for this class+slot+date, update it
     const query = `
-      INSERT INTO alter_requests (
-        absent_staff_id, class_name, subject, class_date,
-        start_time, end_time, department_id,
-        recommended_staff_id, status, expires_at
-      )
-      VALUES ($1, $2, $3, CURRENT_DATE, $4::time, $5::time, $6, $7, 'PENDING', NOW() + INTERVAL '1 hour')
-      ON CONFLICT (class_name, class_date, start_time)
-      DO UPDATE SET
-        recommended_staff_id = EXCLUDED.recommended_staff_id,
-        status = 'MODIFIED',
-        created_at = NOW(),
+      UPDATE alter_requests
+      SET
+        recommended_staff_id = $2,
+        status = 'APPROVED',
+        approved_by = $3,
         expires_at = NOW() + INTERVAL '1 hour'
+      WHERE id = $1
+        AND department_id = $4
       RETURNING
-        id AS assignment_id,
+        id AS alter_request_id,
         class_name,
         subject,
         start_time,
@@ -247,30 +284,31 @@ router.post("/assign-swap", async (req, res) => {
     `;
 
     const result = await pool.query(query, [
-      absent_staff_id,
-      class_name,
-      subject,
-      start_time,
-      end_time,
-      department_id,
+      alter_request_id,
       recommended_staff_id,
+      req.user.id,
+      req.user.department_id,
     ]);
 
-    // Attach assigned staff name
-    const staffResult = await pool.query(
-      `SELECT name FROM staff WHERE id = $1`,
-      [recommended_staff_id]
-    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Alter request not found" });
+    }
 
-    const assignment = {
-      ...result.rows[0],
-      assigned_staff_name: staffResult.rows[0]?.name || "Unknown",
-    };
+    // Attach staff names
+    const row = result.rows[0];
+    const [staffRes, absentRes] = await Promise.all([
+      pool.query(`SELECT name FROM staff WHERE id = $1`, [recommended_staff_id]),
+      pool.query(`SELECT name FROM staff WHERE id = $1`, [row.absent_staff_id]),
+    ]);
 
-    res.json(assignment);
+    res.json({
+      ...row,
+      assigned_staff_name: staffRes.rows[0]?.name || "Unknown",
+      absent_teacher: absentRes.rows[0]?.name || "Unknown",
+    });
   } catch (error) {
     console.error("Error assigning swap:", error);
-    res.status(500).json({ error: "Failed to assign swap" });
+    res.status(500).json({ error: "Failed to assign swap", detail: error.message });
   }
 });
 

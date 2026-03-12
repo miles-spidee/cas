@@ -1,7 +1,9 @@
 import express from "express";
 import cors from "cors";
 import { pool } from "./config/db.js";
+import authRoutes from "./routes/auth.routes.js";
 import hodRoutes from "./routes/hod.routes.js";
+import { requireAuth, requireHOD } from "./middlewares/auth.js";
 
 const app = express();
 app.use(cors());
@@ -11,8 +13,11 @@ app.get("/health", (_, res) => {
   res.json({ status: "OK" });
 });
 
-// HOD routes
-app.use("/api/hod", hodRoutes);
+// Public auth routes (login, /me)
+app.use("/api/auth", authRoutes);
+
+// Protected HOD routes — require valid JWT + HOD role
+app.use("/api/hod", requireAuth, requireHOD, hodRoutes);
 
 // Test database connection
 app.get("/api/db-test", async (_, res) => {
