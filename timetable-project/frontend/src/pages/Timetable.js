@@ -1,19 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import EditModal from "../components/EditModal";
+import "./Timetable.css";
 
-function Timetable({ className }) {
+const API = "http://localhost:5001";
 
+function Timetable({ className, onBack }) {
   const [timetable, setTimetable] = useState({});
-
-  useEffect(() => {
-
-    fetch(`http://localhost:5001/timetable/${className}`)
-      .then(res => res.json())
-      .then(data => {
-        console.log("API DATA:", data);
-        setTimetable(data);
-      });
-
-  }, [className]);
+  const [editTarget, setEditTarget] = useState(null); // { cell, day, period }
+  const [notification, setNotification] = useState(null);
 
   const days = [
     { id: 1, name: "Monday" },
@@ -21,128 +15,232 @@ function Timetable({ className }) {
     { id: 3, name: "Wednesday" },
     { id: 4, name: "Thursday" },
     { id: 5, name: "Friday" },
-    { id: 6, name: "Saturday" }
+    { id: 6, name: "Saturday" },
   ];
 
-  const periods = [1,2,3,4,5,6,7,8];
+  const periods = [1, 2, 3, 4, 5, 6, 7, 8];
 
+  /* ---- FETCH TIMETABLE ---- */
+  const fetchTimetable = useCallback(() => {
+    fetch(`${API}/timetable/${className}`)
+      .then((res) => res.json())
+      .then((data) => setTimetable(data))
+      .catch((err) => console.error("Fetch error:", err));
+  }, [className]);
+
+  useEffect(() => {
+    fetchTimetable();
+  }, [fetchTimetable]);
+
+  /* ---- NOTIFICATION ---- */
+  const showNotification = (msg, type = "success") => {
+    setNotification({ msg, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  /* ---- CELL CLICK ---- */
+  const handleCellClick = (day, period, cell) => {
+    setEditTarget({ cell, day, period });
+  };
+
+  /* ---- SAVE (CREATE / UPDATE) ---- */
+  const handleSave = async (id, payload, isNew) => {
+    try {
+      let res;
+
+      if (isNew) {
+        res = await fetch(`${API}/timetable`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        res = await fetch(`${API}/timetable/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Save failed");
+      }
+
+      showNotification(isNew ? "Entry created!" : "Entry updated!");
+      setEditTarget(null);
+      fetchTimetable();
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  };
+
+  /* ---- DELETE ---- */
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch(`${API}/timetable/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Delete failed");
+      }
+
+      showNotification("Entry deleted!", "delete");
+      setEditTarget(null);
+      fetchTimetable();
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  };
+
+  /* ---- RENDER ---- */
   return (
+    <div className="timetable-container">
+      {/* NOTIFICATION */}
+      {notification && (
+        <div className={`notification notification-${notification.type}`}>
+          {notification.msg}
+        </div>
+      )}
 
-    <div style={{ padding: "20px" }}>
+      <button className="back-btn" onClick={onBack}>
+        ← Back to Classes
+      </button>
 
-      <h2 style={{ textAlign: "center" }}>
-        Timetable - {className}
-      </h2>
+      <div className="timetable-header">
+        <h2>Timetable &mdash; {className}</h2>
+        <p className="timetable-hint">Click any cell to edit or add an entry</p>
+      </div>
 
-      <table
-        border="1"
-        cellPadding="10"
-        style={{
-          borderCollapse: "collapse",
-          width: "100%",
-          textAlign: "center"
-        }}
-      >
+      <div className="timetable-scroll">
+        <table className="timetable-grid">
+          <thead>
+            <tr>
+              <th className="day-col">Day</th>
+              <th className="period-col">
+                1<br />
+                <span className="time-label">08:00</span>
+              </th>
+              <th className="period-col">
+                2<br />
+                <span className="time-label">08:45</span>
+              </th>
+              <th className="break-col">Break</th>
+              <th className="period-col">
+                3<br />
+                <span className="time-label">09:45</span>
+              </th>
+              <th className="period-col">
+                4<br />
+                <span className="time-label">10:30</span>
+              </th>
+              <th className="period-col">
+                5<br />
+                <span className="time-label">11:15</span>
+              </th>
+              <th className="break-col">Lunch</th>
+              <th className="period-col">
+                6<br />
+                <span className="time-label">13:00</span>
+              </th>
+              <th className="period-col">
+                7<br />
+                <span className="time-label">13:45</span>
+              </th>
+              <th className="period-col">
+                8<br />
+                <span className="time-label">14:30</span>
+              </th>
+            </tr>
+          </thead>
 
-        <thead>
-          <tr>
+          <tbody>
+            {days.map((day) => {
+              let skip = 0;
+              const cells = [];
 
-            <th>Day</th>
+              periods.forEach((period) => {
+                if (skip > 0) {
+                  skip--;
+                  return;
+                }
 
-            <th>1<br/>08:00</th>
-            <th>2<br/>08:45</th>
+                const cell = timetable?.[day.id]?.[period];
 
+                if (cell?.span > 1) {
+                  skip = cell.span - 1;
+                }
 
-            <th style={{background:"#ddd"}}>Break</th>
+                const isEmpty = !cell;
+                const isLab = cell?.span > 1;
 
-            <th>3<br/>09:45</th>
-            <th>4<br/>10:30</th>
-            <th>5<br/>11:15</th>
+                cells.push(
+                  <td
+                    key={period}
+                    colSpan={cell?.span || 1}
+                    className={`tt-cell ${isEmpty ? "tt-cell-empty" : ""} ${
+                      isLab ? "tt-cell-lab" : ""
+                    }`}
+                    onClick={() => handleCellClick(day.id, period, cell || null)}
+                    title={isEmpty ? "Click to add" : "Click to edit"}
+                  >
+                    {cell ? (
+                      <>
+                        <div className="cell-subject">{cell.subject}</div>
+                        <div className="cell-staff">{cell.staff}</div>
+                      </>
+                    ) : (
+                      <div className="cell-plus">+</div>
+                    )}
+                  </td>
+                );
 
-            <th style={{background:"#ddd"}}>Lunch</th>
+                /* Break after period 2 */
+                if (period === 2) {
+                  cells.push(
+                    <td key={`break-${day.id}`} className="break-cell">
+                      Break
+                    </td>
+                  );
+                }
 
-            <th>6<br/>13:00</th>
-            <th>7<br/>13:45</th>
-            <th>8<br/>14:30</th>
+                /* Lunch after period 5 */
+                if (period === 5) {
+                  cells.push(
+                    <td key={`lunch-${day.id}`} className="break-cell">
+                      Lunch
+                    </td>
+                  );
+                }
+              });
 
-          </tr>
-        </thead>
-        
-        <tbody>
+              return (
+                <tr key={day.id}>
+                  <td className="day-cell">{day.name}</td>
+                  {cells}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
 
-{days.map(day => {
-
-  let skip = 0;
-  const cells = [];
-
-  periods.forEach(period => {
-
-    if (skip > 0) {
-      skip--;
-      return;
-    }
-
-    const cell = timetable?.[day.id]?.[period];
-
-    if (cell?.span > 1) {
-      skip = cell.span - 1;
-    }
-
-    cells.push(
-      <td key={period} colSpan={cell?.span || 1}>
-        {cell && (
-          <>
-            <div style={{fontWeight:"bold"}}>
-              {cell.subject}
-            </div>
-
-            <div style={{fontSize:"12px"}}>
-              {cell.staff}
-            </div>
-          </>
-        )}
-      </td>
-    );
-
-    /* INSERT BREAK COLUMN AFTER PERIOD 2 */
-
-    if(period === 2){
-      cells.push(
-        <td key={`break-${day.id}`} style={{background:"#eee", fontWeight:"bold"}}>
-          Break
-        </td>
-      );
-    }
-
-    /* INSERT LUNCH COLUMN AFTER PERIOD 5 */
-
-    if(period === 5){
-      cells.push(
-        <td key={`lunch-${day.id}`} style={{background:"#eee", fontWeight:"bold"}}>
-          Lunch
-        </td>
-      );
-    }
-
-  });
-
-  return (
-    <tr key={day.id}>
-      <td style={{fontWeight:"bold"}}>{day.name}</td>
-      {cells}
-    </tr>
-  );
-
-})}
-
-</tbody>
-
-      </table>
-
+      {/* EDIT MODAL */}
+      {editTarget && (
+        <EditModal
+          cell={editTarget.cell}
+          day={editTarget.day}
+          period={editTarget.period}
+          className={className}
+          onClose={() => setEditTarget(null)}
+          onSave={handleSave}
+          onDelete={handleDelete}
+        />
+      )}
     </div>
-
   );
-
 }
 
 export default Timetable;
