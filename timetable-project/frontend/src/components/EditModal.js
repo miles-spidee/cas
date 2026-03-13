@@ -30,6 +30,7 @@ function EditModal({ cell, day, slotKey, slot, className, onClose, onSave, onDel
   const [staffList, setStaffList] = useState([]);
   const [subjectList, setSubjectList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [facultyInput, setFacultyInput] = useState("");
 
   const isNew = !cell || !cell.id;
   const isBreakOrLunch = slotKey === "BREAK" || slotKey === "LUNCH";
@@ -56,6 +57,32 @@ function EditModal({ cell, day, slotKey, slot, className, onClose, onSave, onDel
         setLoading(false);
       });
   }, []);
+
+  const getFacultyOptionLabel = (member) =>
+    `${member.name}${member.email ? ` (${member.email})` : ""} • ${String(member.id).slice(0, 8)}`;
+
+  useEffect(() => {
+    if (isBreakOrLunch || !form.staff_id || staffList.length === 0) return;
+
+    const selected = staffList.find((member) => String(member.id) === String(form.staff_id));
+    if (selected) {
+      setFacultyInput(getFacultyOptionLabel(selected));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [staffList, form.staff_id, isBreakOrLunch]);
+
+  const handleFacultyInput = (value) => {
+    setFacultyInput(value);
+
+    const selected = staffList.find(
+      (member) => getFacultyOptionLabel(member) === value
+    );
+
+    setForm((prev) => ({
+      ...prev,
+      staff_id: selected ? selected.id : "",
+    }));
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -142,14 +169,22 @@ function EditModal({ cell, day, slotKey, slot, className, onClose, onSave, onDel
 
         <div className="form-group">
           <label>Staff</label>
-          <select name="staff_id" value={form.staff_id} onChange={handleChange} disabled={isBreakOrLunch}>
-            <option value="">-- Select Staff --</option>
-            {staffList.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
+          <input
+            type="text"
+            list="modal-faculty-options"
+            placeholder="Search and select faculty"
+            value={facultyInput}
+            onChange={(e) => handleFacultyInput(e.target.value)}
+            disabled={isBreakOrLunch}
+          />
+          <datalist id="modal-faculty-options">
+            {staffList.map((member) => (
+              <option key={member.id} value={getFacultyOptionLabel(member)} />
             ))}
-          </select>
+          </datalist>
+          {!isBreakOrLunch && facultyInput && !form.staff_id && (
+            <small style={{ color: "#a33" }}>Select a faculty from suggestions.</small>
+          )}
         </div>
 
         <div className="form-row">

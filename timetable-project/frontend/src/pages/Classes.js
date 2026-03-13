@@ -28,8 +28,10 @@ const TIME_OPTIONS = [
 function Classes({ department, setClassName, onBack }) {
   const [classes, setClasses] = useState([]);
   const [staff, setStaff] = useState([]);
+  const [allStaff, setAllStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const [staffLoading, setStaffLoading] = useState(true);
+  const [allStaffLoading, setAllStaffLoading] = useState(true);
 
   /* ---- Create class form ---- */
   const [newClassForm, setNewClassForm] = useState({
@@ -41,6 +43,7 @@ function Classes({ department, setClassName, onBack }) {
     staff_id: "",
   });
   const [creating, setCreating] = useState(false);
+  const [facultyInput, setFacultyInput] = useState("");
 
   /* ---- Staff CRUD ---- */
   const [staffForm, setStaffForm] = useState({ name: "", email: "" });
@@ -58,6 +61,16 @@ function Classes({ department, setClassName, onBack }) {
       .catch(() => setStaffLoading(false));
   };
 
+  const fetchAllStaff = () => {
+    fetch(`${API}/staff`)
+      .then((res) => res.json())
+      .then((data) => {
+        setAllStaff(data);
+        setAllStaffLoading(false);
+      })
+      .catch(() => setAllStaffLoading(false));
+  };
+
   const fetchClasses = () => {
     fetch(`${API}/classes/${department.id}`)
       .then((res) => res.json())
@@ -71,8 +84,22 @@ function Classes({ department, setClassName, onBack }) {
   useEffect(() => {
     fetchClasses();
     fetchStaff();
+    fetchAllStaff();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [department.id]);
+
+  const getFacultyOptionLabel = (member) =>
+    `${member.name}${member.email ? ` (${member.email})` : ""} • ${String(member.id).slice(0, 8)}`;
+
+  const handleFacultyInput = (value) => {
+    setFacultyInput(value);
+
+    const selected = allStaff.find(
+      (member) => getFacultyOptionLabel(member) === value
+    );
+
+    updateClassForm("staff_id", selected ? selected.id : "");
+  };
 
   const updateClassForm = (key, value) => {
     setNewClassForm((prev) => ({
@@ -123,6 +150,7 @@ function Classes({ department, setClassName, onBack }) {
         subject: "",
         staff_id: "",
       });
+      setFacultyInput("");
       fetchClasses();
     } catch (err) {
       alert("Error: " + err.message);
@@ -321,18 +349,23 @@ function Classes({ department, setClassName, onBack }) {
 
         <div className="form-field">
           <label>Assigned Staff</label>
-          <select
-            value={newClassForm.staff_id}
-            onChange={(e) => updateClassForm("staff_id", e.target.value)}
+          <input
+            type="text"
+            list="all-faculty-options"
+            placeholder={allStaffLoading ? "Loading faculty..." : "Search and select faculty"}
+            value={facultyInput}
+            onChange={(e) => handleFacultyInput(e.target.value)}
             required
-          >
-            <option value="">-- Select Staff --</option>
-            {staff.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
+            disabled={allStaffLoading}
+          />
+          <datalist id="all-faculty-options">
+            {allStaff.map((member) => (
+              <option key={member.id} value={getFacultyOptionLabel(member)} />
             ))}
-          </select>
+          </datalist>
+          {facultyInput && !newClassForm.staff_id && (
+            <small style={{ color: "#a33" }}>Select a faculty from suggestions.</small>
+          )}
         </div>
 
         <button
