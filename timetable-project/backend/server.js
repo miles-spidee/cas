@@ -6,6 +6,7 @@ require("dotenv").config();
 const pool = require("./db");
 
 const app = express();
+const API_BASE_PATH = "/timemaster";
 
 app.use(cors());
 app.use(express.json());
@@ -92,6 +93,10 @@ const resolveStaffIdForEntry = async (dbClient, { staff_id, subject, department_
 ------------------------- */
 
 app.get("/", (req, res) => {
+  res.send("Timetable API Running. Use /timemaster as base path.");
+});
+
+app.get(`${API_BASE_PATH}`, (req, res) => {
   res.send("Timetable API Running");
 });
 
@@ -99,7 +104,7 @@ app.get("/", (req, res) => {
    GET DEPARTMENTS
 ------------------------- */
 
-app.get("/departments", async (req, res) => {
+app.get(`${API_BASE_PATH}/departments`, async (req, res) => {
 
   try {
 
@@ -122,7 +127,7 @@ app.get("/departments", async (req, res) => {
    GET CLASSES BY DEPARTMENT
 ------------------------- */
 
-app.get("/classes/:deptId", async (req, res) => {
+app.get(`${API_BASE_PATH}/classes/:deptId`, async (req, res) => {
 
   const { deptId } = req.params;
 
@@ -152,7 +157,7 @@ app.get("/classes/:deptId", async (req, res) => {
    CREATE CLASS (placeholder entry)
 ------------------------- */
 
-app.post("/classes", async (req, res) => {
+app.post(`${API_BASE_PATH}/classes`, async (req, res) => {
 
   const {
     class_name,
@@ -218,7 +223,7 @@ app.post("/classes", async (req, res) => {
    GET TIMETABLE
 ------------------------- */
 
-app.get("/timetable/:className", async (req, res) => {
+app.get(`${API_BASE_PATH}/timetable/:className`, async (req, res) => {
 
   const { className } = req.params;
 
@@ -305,7 +310,7 @@ app.get("/timetable/:className", async (req, res) => {
    CREATE TIMETABLE ENTRY
 ------------------------- */
 
-app.post("/timetable", async (req, res) => {
+app.post(`${API_BASE_PATH}/timetable`, async (req, res) => {
 
   const { class_name, day_of_week, start_time, end_time, subject, staff_id, department_id } = req.body;
 
@@ -345,7 +350,7 @@ app.post("/timetable", async (req, res) => {
    UPDATE TIMETABLE ENTRY
 ------------------------- */
 
-app.put("/timetable/:id", async (req, res) => {
+app.put(`${API_BASE_PATH}/timetable/:id`, async (req, res) => {
 
   const { id } = req.params;
   const { day_of_week, start_time, end_time, subject, staff_id, department_id } = req.body;
@@ -401,7 +406,7 @@ app.put("/timetable/:id", async (req, res) => {
    DELETE TIMETABLE ENTRY
 ------------------------- */
 
-app.delete("/timetable/:id", async (req, res) => {
+app.delete(`${API_BASE_PATH}/timetable/:id`, async (req, res) => {
 
   const { id } = req.params;
 
@@ -431,7 +436,7 @@ app.delete("/timetable/:id", async (req, res) => {
    BATCH UPSERT TIMETABLE
 ------------------------- */
 
-app.post("/timetable/batch", async (req, res) => {
+app.post(`${API_BASE_PATH}/timetable/batch`, async (req, res) => {
 
   const {
     creates = [],
@@ -546,7 +551,7 @@ app.post("/timetable/batch", async (req, res) => {
    GET STAFF LIST
 ------------------------- */
 
-app.get("/staff", async (req, res) => {
+app.get(`${API_BASE_PATH}/staff`, async (req, res) => {
 
   try {
 
@@ -565,7 +570,7 @@ app.get("/staff", async (req, res) => {
 
 });
 
-app.get("/staff/:deptId", async (req, res) => {
+app.get(`${API_BASE_PATH}/staff/:deptId`, async (req, res) => {
 
   const { deptId } = req.params;
 
@@ -587,7 +592,7 @@ app.get("/staff/:deptId", async (req, res) => {
 
 });
 
-app.post("/staff", async (req, res) => {
+app.post(`${API_BASE_PATH}/staff`, async (req, res) => {
 
   const { name, email, department_id, role = "STAFF", rfid_uid } = req.body;
 
@@ -619,7 +624,7 @@ app.post("/staff", async (req, res) => {
 
 });
 
-app.put("/staff/:id", async (req, res) => {
+app.put(`${API_BASE_PATH}/staff/:id`, async (req, res) => {
 
   const { id } = req.params;
   const { name, email, department_id, role } = req.body;
@@ -674,7 +679,7 @@ app.put("/staff/:id", async (req, res) => {
 
 });
 
-app.delete("/staff/:id", async (req, res) => {
+app.delete(`${API_BASE_PATH}/staff/:id`, async (req, res) => {
 
   const { id } = req.params;
 
@@ -704,7 +709,7 @@ app.delete("/staff/:id", async (req, res) => {
    GET DISTINCT SUBJECTS
 ------------------------- */
 
-app.get("/subjects", async (req, res) => {
+app.get(`${API_BASE_PATH}/subjects`, async (req, res) => {
 
   try {
 
@@ -727,7 +732,7 @@ app.get("/subjects", async (req, res) => {
    START SERVER
 ------------------------- */
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

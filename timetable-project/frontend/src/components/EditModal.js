@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import "./EditModal.css";
 
+const API = "http://localhost:5000/timemaster";
+
 const TIME_OPTIONS = [
   "08:00:00",
   "08:45:00",
@@ -41,8 +43,8 @@ function EditModal({ cell, day, slotKey, slot, className, onClose, onSave, onDel
 
   useEffect(() => {
     Promise.all([
-      fetch("http://localhost:5001/staff").then((r) => r.json()),
-      fetch("http://localhost:5001/subjects").then((r) => r.json()),
+      fetch(`${API}/staff`).then((r) => r.json()),
+      fetch(`${API}/subjects`).then((r) => r.json()),
     ])
       .then(([staff, subjects]) => {
         setStaffList(staff);

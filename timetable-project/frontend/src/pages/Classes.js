@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API = "http://localhost:5001";
+const API = "http://localhost:5000/timemaster";
 
 const DAY_OPTIONS = [
   { id: 1, name: "Monday" },

@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import EditModal from "../components/EditModal";
 import "./Timetable.css";
 
-const API = "http://localhost:5001";
+const API = "http://localhost:5000/timemaster";
 
 const SLOT_CONFIG = [
   { key: "P1", label: "1", start: "08:00:00", end: "08:45:00", type: "period", timeLabel: "08:00" },

@@ -5,7 +5,7 @@ function Departments({ setDepartment }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5001/departments")
+    fetch("http://localhost:5000/timemaster/departments")
       .then((res) => res.json())
       .then((data) => {
         setDepartments(data);
