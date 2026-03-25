@@ -714,3 +714,28 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* ---------- footer ---------- */
+.hod-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 36px;
+  background: transparent;
+  border-top: 1px solid rgba(74, 144, 217, 0.08);
+  opacity: 0.6;
+}
+
+.hod-footer__logo {
+  height: 20px;
+  width: auto;
+  object-fit: contain;
+}
+
+.hod-footer__text {
+  font-size: 12px;
+  font-weight: 500;
+  color: #1a1a2e;
+  letter-spacing: 0.3px;
+}

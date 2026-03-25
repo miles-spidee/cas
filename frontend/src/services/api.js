@@ -30,11 +30,12 @@ async function handleResponse(res) {
 
 // ── Auth ──
 
-export async function loginAPI(email, password) {
+export async function loginAPI(email, password, options = {}) {
+  const { portal } = options;
   const res = await fetch(`${API_BASE}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, portal }),
   });
   return handleResponse(res);
 }
@@ -76,6 +77,94 @@ export async function assignSwap(payload) {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify(payload),
+  });
+  return handleResponse(res);
+}
+
+// ── Timetable endpoints (JWT required) ──
+
+export async function fetchTimetableDepartments() {
+  const res = await fetch(`${API_BASE}/api/timetable/departments`, {
+    headers: authHeaders(),
+  });
+  return handleResponse(res);
+}
+
+export async function fetchDepartmentClasses(deptId) {
+  const res = await fetch(`${API_BASE}/api/timetable/classes/${deptId}`, {
+    headers: authHeaders(),
+  });
+  return handleResponse(res);
+}
+
+export async function createDepartmentClass(payload) {
+  const res = await fetch(`${API_BASE}/api/timetable/classes`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(res);
+}
+
+export async function fetchTimetableByClass(className) {
+  const res = await fetch(`${API_BASE}/api/timetable/timetable/${encodeURIComponent(className)}`, {
+    headers: authHeaders(),
+  });
+  return handleResponse(res);
+}
+
+export async function saveTimetableBatch(payload) {
+  const res = await fetch(`${API_BASE}/api/timetable/timetable/batch`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(res);
+}
+
+export async function fetchActiveStaff() {
+  const res = await fetch(`${API_BASE}/api/timetable/staff`, {
+    headers: authHeaders(),
+  });
+  return handleResponse(res);
+}
+
+export async function fetchStaffByDepartment(deptId) {
+  const res = await fetch(`${API_BASE}/api/timetable/staff/${deptId}`, {
+    headers: authHeaders(),
+  });
+  return handleResponse(res);
+}
+
+export async function createStaff(payload) {
+  const res = await fetch(`${API_BASE}/api/timetable/staff`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(res);
+}
+
+export async function updateStaff(id, payload) {
+  const res = await fetch(`${API_BASE}/api/timetable/staff/${id}`, {
+    method: "PUT",
+    headers: authHeaders(),
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(res);
+}
+
+export async function deleteStaff(id) {
+  const res = await fetch(`${API_BASE}/api/timetable/staff/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  return handleResponse(res);
+}
+
+export async function fetchTimetableSubjects() {
+  const res = await fetch(`${API_BASE}/api/timetable/subjects`, {
+    headers: authHeaders(),
   });
   return handleResponse(res);
 }

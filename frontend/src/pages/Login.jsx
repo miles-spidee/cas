@@ -2,7 +2,12 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { loginAPI } from '../services/api'
+import logo from '../assets/logo.png'
+import ipsLogo from '../assets/ips-logo.png'
 import '../styles/global.css'
+
+const TIMETABLE_ONLY_EMAIL = 'shanmugasundaram@college.edu'
+const TIMETABLE_ONLY_PASSWORD = '123123'
 
 function Login() {
   const [email, setEmail] = useState('')
@@ -17,10 +22,21 @@ function Login() {
     e.preventDefault()
     setError(null)
     setLoading(true)
+
+    const normalizedEmail = email.trim().toLowerCase()
+    const isTimetableOnlyUser =
+      normalizedEmail === TIMETABLE_ONLY_EMAIL && password === TIMETABLE_ONLY_PASSWORD
+
     try {
-      const data = await loginAPI(email, password)
+      const data = await loginAPI(email, password, {
+        portal: isTimetableOnlyUser ? 'timetable' : 'hod',
+      })
       login(data.token, data.user)
-      navigate('/hod')
+      if (isTimetableOnlyUser) {
+        navigate('/timetable')
+      } else {
+        navigate('/hod')
+      }
     } catch (err) {
       // Parse error message from API response
       let message = err.message
@@ -39,7 +55,10 @@ function Login() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1 className="login-card__title">Class Alter System</h1>
+        <div className="login-card__logo-wrapper">
+          <img src={logo} alt="KITE Logo" className="login-card__logo" />
+        </div>
+        <h1 className="login-card__title">CLASS ALTER SYSTEM</h1>
         <p className="login-card__subtitle">HOD Login</p>
 
         {error && (
@@ -97,6 +116,12 @@ function Login() {
           </button>
         </form>
       </div>
+
+      {/* Footer */}
+      <footer className="login-footer">
+        <img src={ipsLogo} alt="IPS Tech Community" className="login-footer__logo" />
+        <span className="login-footer__text">powered by IPS Tech Community</span>
+      </footer>
     </div>
   )
 }

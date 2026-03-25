@@ -9,6 +9,7 @@ import {
   assignSwap
 } from '../services/api'
 import logo from '../assets/logo.png'
+import ipsLogo from '../assets/ips-logo.png'
 import '../styles/hod-dashboard.css'
 
 function HODDashboard() {
@@ -265,7 +266,7 @@ function HODDashboard() {
                       </span>
                       {cls.approval_method && (
                         <span className={`hod-card__approval-badge hod-card__approval-badge--${cls.approval_method.toLowerCase()}`}>
-                          {cls.approval_method === 'Auto' ? '⚡ Auto' : '👤 HOD'}
+                          {cls.approval_method === 'Auto' ? 'Auto' : '👤 HOD'}
                         </span>
                       )}
                       <span className={`hod-card__assign-status hod-card__assign-status--${cls.status?.toLowerCase()}`}>
@@ -408,6 +409,12 @@ function HODDashboard() {
           )}
         </section>
       </div>
+
+      {/* Footer */}
+      <footer className="hod-footer">
+        <img src={ipsLogo} alt="IPS Tech Community" className="hod-footer__logo" />
+        <span className="hod-footer__text">powered by IPS Tech Community</span>
+      </footer>
     </div>
   )
 }

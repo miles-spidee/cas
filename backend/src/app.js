@@ -3,6 +3,7 @@ import cors from "cors";
 import { pool } from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import hodRoutes from "./routes/hod.routes.js";
+import timetableRoutes from "./routes/timetable.routes.js";
 import { requireAuth, requireHOD } from "./middlewares/auth.js";
 
 const app = express();
@@ -18,6 +19,9 @@ app.use("/api/auth", authRoutes);
 
 // Protected HOD routes — require valid JWT + HOD role
 app.use("/api/hod", requireAuth, requireHOD, hodRoutes);
+
+// Protected timetable routes — shared backend module
+app.use("/api/timetable", requireAuth, timetableRoutes);
 
 // Test database connection
 app.get("/api/db-test", async (_, res) => {

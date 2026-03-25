@@ -8,9 +8,10 @@ import { pool } from '../config/db.js';
 
 /**
  * Insert PENDING alter_requests for every class whose teacher has no
- * attendance record today.  ON CONFLICT ensures we don't create duplicates.
+ * attendance record today. ON CONFLICT ensures we don't create duplicates.
+ * Then auto-assigns the top recommended staff (highest free_minutes).
  *
- * @returns {number} Number of new rows inserted
+ * @returns {object} { inserted: count, assigned: count }
  */
 export async function generateAlterRequests() {
   // Guard: only generate alter_requests if attendance has been taken today.
@@ -20,10 +21,10 @@ export async function generateAlterRequests() {
   );
   const attendanceCount = parseInt(attendanceCheck.rows[0].count, 10);
   if (attendanceCount === 0) {
-    return 0; // No attendance yet — skip
+    return { inserted: 0, assigned: 0 }; // No attendance yet — skip
   }
 
-  const query = `
+  const insertQuery = `
     INSERT INTO alter_requests (
       id,
       absent_staff_id,
@@ -61,8 +62,63 @@ export async function generateAlterRequests() {
     ON CONFLICT (class_name, class_date, start_time) DO NOTHING
   `;
 
-  const result = await pool.query(query);
-  return result.rowCount;
+  const insertResult = await pool.query(insertQuery);
+  const inserted = insertResult.rowCount;
+
+  // ── Auto-assign top recommended staff ──
+  // For each PENDING alter_request without a recommended_staff_id,
+  // find the top candidate (most free time) and assign them
+  const assignQuery = `
+    WITH pending_requests AS (
+      SELECT ar.id, ar.absent_staff_id, ar.start_time, ar.end_time, ar.department_id
+      FROM alter_requests ar
+      WHERE ar.class_date = CURRENT_DATE
+        AND ar.status = 'PENDING'
+        AND ar.recommended_staff_id IS NULL
+    ),
+    top_candidates AS (
+      SELECT DISTINCT ON (pr.id)
+        pr.id AS alter_request_id,
+        s.id AS candidate_id
+      FROM pending_requests pr
+      JOIN staff s ON s.department_id = pr.department_id
+      WHERE s.id != pr.absent_staff_id
+        AND s.is_active = true
+        -- No timetable conflict
+        AND NOT EXISTS (
+          SELECT 1 FROM timetable t
+          WHERE t.staff_id = s.id
+            AND t.day_of_week = EXTRACT(DOW FROM CURRENT_DATE)
+            AND t.start_time < pr.end_time
+            AND t.end_time > pr.start_time
+        )
+        -- Not absent
+        AND NOT EXISTS (
+          SELECT 1 FROM alter_requests ar2
+          WHERE ar2.absent_staff_id = s.id
+            AND ar2.class_date = CURRENT_DATE
+        )
+      ORDER BY pr.id,
+        COALESCE(
+          (SELECT MAX(t.end_time)
+           FROM timetable t
+           WHERE t.staff_id = s.id
+             AND t.day_of_week = EXTRACT(DOW FROM CURRENT_DATE)
+             AND t.end_time <= pr.start_time),
+          '09:00:00'::time
+        ) DESC  -- Highest free_minutes first
+    )
+    UPDATE alter_requests ar
+    SET recommended_staff_id = tc.candidate_id
+    FROM top_candidates tc
+    WHERE ar.id = tc.alter_request_id
+    RETURNING ar.id
+  `;
+
+  const assignResult = await pool.query(assignQuery);
+  const assigned = assignResult.rowCount;
+
+  return { inserted, assigned };
 }
 
 /**

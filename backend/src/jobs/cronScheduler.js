@@ -1,11 +1,12 @@
 /**
  * Cron Scheduler
- * Runs staffStatus refresh and alterRequest generation every 1 minute.
+ * Runs staffStatus refresh, alterRequest generation, and auto-approval every 1 minute.
  */
 
 import cron from 'node-cron';
 import { refreshStaffStatus } from '../services/staffStatusService.js';
 import { generateAlterRequests, cleanupStaleAlterRequests } from '../services/alterRequestService.js';
+import { autoApproveAlterRequests } from '../services/autoApprovalService.js';
 
 let isRunning = false;
 
@@ -29,10 +30,19 @@ async function tick() {
       console.log(`🧹 [cron] ${cleaned} stale alter_request(s) removed (staff actually present)`);
     }
 
-    // 3. Generate any new alter_requests for today
-    const inserted = await generateAlterRequests();
+    // 3. Generate any new alter_requests for today + auto-assign top candidates
+    const { inserted, assigned } = await generateAlterRequests();
     if (inserted > 0) {
       console.log(`✅ [cron] ${inserted} new alter_request(s) created`);
+    }
+    if (assigned > 0) {
+      console.log(`👤 [cron] ${assigned} alter_request(s) auto-assigned to top candidate`);
+    }
+
+    // 4. Auto-approve PENDING alter_requests 40 min before start time
+    const autoApproved = await autoApproveAlterRequests();
+    if (autoApproved > 0) {
+      console.log(`✅ [cron] ${autoApproved} alter_request(s) auto-approved (40 min before start)`);
     }
   } catch (err) {
     console.error('❌ [cron] tick error:', err.message);

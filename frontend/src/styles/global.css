@@ -10,6 +10,7 @@
   min-height: 100vh;
   background: #f4f6f9;
   font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  position: relative;
 }
 
 /* card */
@@ -29,18 +30,33 @@
   box-shadow: 0 4px 20px rgba(74, 144, 217, 0.08);
 }
 
+/* logo wrapper */
+.login-card__logo-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.login-card__logo {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+}
+
 .login-card__title {
-  margin: 0 0 4px;
-  font-size: 26px;
+  margin: 0 0 16px;
+  font-size: 16px;
   font-weight: 700;
-  color: #1a1a2e;
-  letter-spacing: -0.4px;
+  color: rgb(28, 28, 49);
+  letter-spacing: 3px;
   text-align: center;
+  opacity: 0.60;
+  text-transform: uppercase;
 }
 
 .login-card__subtitle {
   margin: 0 0 32px;
-  font-size: 14px;
+  font-size: 16px;
   color: rgba(26, 26, 46, 0.4);
   text-align: center;
 }
@@ -163,6 +179,31 @@
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+
+/* -------- LOGIN FOOTER -------- */
+.login-footer {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.6;
+}
+
+.login-footer__logo {
+  height: 20px;
+  width: auto;
+  object-fit: contain;
+}
+
+.login-footer__text {
+  font-size: 12px;
+  font-weight: 500;
+  color: #1a1a2e;
+  letter-spacing: 0.3px;
 }
 
 /* -------- STAFF PAGE -------- */
