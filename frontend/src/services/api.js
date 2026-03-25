@@ -1,4 +1,10 @@
-const API_BASE = import.meta.env.VITE_API_URL || "";
+const isLocalHost =
+  typeof window !== "undefined" &&
+  ["localhost", "127.0.0.1"].includes(window.location.hostname);
+
+const API_BASE = isLocalHost
+  ? import.meta.env.VITE_API_URL_LOCAL || "http://localhost:5000"
+  : import.meta.env.VITE_API_URL || "https://cas-szpk.onrender.com";
 
 // ── helpers ──
 

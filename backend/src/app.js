@@ -7,7 +7,24 @@ import timetableRoutes from "./routes/timetable.routes.js";
 import { requireAuth, requireHOD } from "./middlewares/auth.js";
 
 const app = express();
-app.use(cors());
+const allowedOrigins = [
+  process.env.FRONTEND_URL || "https://kite-cas.vercel.app/",
+  process.env.FRONTEND_URL_LOCAL || "http://localhost:5173",
+  "http://127.0.0.1:5173",
+].map((origin) => origin.replace(/\/$/, ""));
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow non-browser requests (curl, Postman, server-side jobs)
+      if (!origin) return callback(null, true);
+      const normalized = origin.replace(/\/$/, "");
+      if (allowedOrigins.includes(normalized)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 app.get("/health", (_, res) => {

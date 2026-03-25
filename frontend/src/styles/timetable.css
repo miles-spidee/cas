@@ -1,45 +1,165 @@
 .tt-layout {
+  --tt-primary: #4a90d9;
+  --tt-primary-strong: #3b7fc9;
+  --tt-primary-soft: rgba(74, 144, 217, 0.08);
+  --tt-border: rgba(74, 144, 217, 0.18);
+  --tt-text: #1a1a2e;
+  --tt-muted: rgba(26, 26, 46, 0.56);
+  --tt-surface: #ffffff;
+  --tt-bg: #f4f6f9;
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
-  background: #f4f5fa;
+  background: var(--tt-bg);
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.tt-shell-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 36px;
+  background: var(--tt-surface);
+  border-bottom: 1px solid rgba(74, 144, 217, 0.15);
+}
+
+.tt-shell-header__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tt-shell-header__right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.tt-shell-header__logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  margin-right: auto;
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
+.tt-shell-header__user {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.tt-shell-header__dept {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(26, 26, 46, 0.5);
+  letter-spacing: 0.4px;
+}
+
+.tt-info-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px 36px;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(74, 144, 217, 0.1);
+  font-size: 13px;
+}
+
+.tt-info-bar__title {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: rgba(26, 26, 46, 0.4);
+}
+
+.tt-shell-logout {
+  padding: 6px 16px;
+  background: var(--tt-primary-soft);
+  color: var(--tt-primary);
+  border: 1px solid rgba(74, 144, 217, 0.22);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.tt-shell-logout:hover {
+  background: var(--tt-primary);
+  color: #fff;
+  border-color: var(--tt-primary);
 }
 
 .tt-main {
+  flex: 1;
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 22px 24px 28px;
+}
+
+.tt-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 36px;
+  background: transparent;
+  border-top: 1px solid rgba(74, 144, 217, 0.08);
+  opacity: 0.6;
+}
+
+.tt-footer__logo {
+  height: 20px;
+  width: auto;
+  object-fit: contain;
+}
+
+.tt-footer__text {
+  font-size: 12px;
+  font-weight: 500;
+  color: #1a1a2e;
+  letter-spacing: 0.3px;
 }
 
 .tt-back-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: none;
-  border: 1.5px solid #ccc;
-  border-radius: 8px;
-  padding: 8px 16px;
+  background: #fff;
+  border: 1.5px solid var(--tt-border);
+  border-radius: 10px;
+  padding: 8px 14px;
   font-size: 14px;
   font-weight: 600;
-  color: #555;
+  color: var(--tt-primary);
   cursor: pointer;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
 }
 
 .tt-back-btn:hover {
-  border-color: #3949ab;
-  color: #3949ab;
-  background: #e8eaf6;
+  border-color: var(--tt-primary);
+  background: var(--tt-primary-soft);
 }
 
 .tt-title {
-  font-size: 26px;
+  font-size: 25px;
   font-weight: 700;
-  color: #1a1a2e;
-  margin: 0 0 8px;
+  color: var(--tt-text);
+  margin: 0 0 6px;
 }
 
 .tt-subtitle {
   font-size: 14px;
-  color: #888;
+  color: var(--tt-muted);
   margin: 0 0 24px;
 }
 
@@ -51,36 +171,39 @@
 
 .tt-card {
   background: #fff;
-  border: 1.5px solid #e0e0e0;
+  border: 1px solid var(--tt-border);
   border-radius: 12px;
   padding: 24px 20px;
   text-align: center;
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a2e;
+  color: var(--tt-text);
   cursor: pointer;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
 }
 
 .tt-card:hover {
-  border-color: #3949ab;
-  background: #e8eaf6;
+  border-color: rgba(74, 144, 217, 0.35);
+  box-shadow: 0 4px 20px rgba(74, 144, 217, 0.1);
+  transform: translateY(-1px);
 }
 
 .tt-divider {
   border: none;
-  border-top: 1.5px solid #e0e0e0;
+  border-top: 1px solid var(--tt-border);
   margin: 32px 0;
 }
 
 .tt-form {
   background: #fff;
-  border: 1.5px solid #e0e0e0;
+  border: 1px solid var(--tt-border);
   border-radius: 12px;
   padding: 20px 24px;
   display: flex;
   gap: 12px;
   align-items: flex-end;
   flex-wrap: wrap;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
 }
 
 .tt-field {
@@ -92,16 +215,26 @@
 .tt-field label {
   font-size: 12px;
   font-weight: 600;
-  color: #666;
+  color: rgba(26, 26, 46, 0.65);
 }
 
 .tt-field input,
 .tt-field select {
   padding: 10px 14px;
-  border: 1.5px solid #ccc;
+  border: 1px solid var(--tt-border);
   border-radius: 8px;
   font-size: 14px;
   min-width: 140px;
+  color: var(--tt-text);
+  background: #fff;
+}
+
+.tt-field input:focus,
+.tt-field select:focus,
+.tt-staff-row input:focus {
+  outline: none;
+  border-color: var(--tt-primary);
+  box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.1);
 }
 
 .tt-btn {
@@ -113,8 +246,12 @@
 }
 
 .tt-btn-primary {
-  background: #43a047;
+  background: var(--tt-primary);
   color: #fff;
+}
+
+.tt-btn-primary:hover {
+  background: var(--tt-primary-strong);
 }
 
 .tt-btn-primary:disabled {
@@ -130,7 +267,7 @@
 
 .tt-staff-row {
   background: #fff;
-  border: 1.5px solid #e0e0e0;
+  border: 1px solid var(--tt-border);
   border-radius: 10px;
   padding: 12px;
   display: flex;
@@ -141,7 +278,7 @@
 
 .tt-staff-row input {
   padding: 8px 10px;
-  border: 1.5px solid #ccc;
+  border: 1px solid var(--tt-border);
   border-radius: 8px;
   font-size: 13px;
 }
@@ -154,7 +291,7 @@
 
 .tt-staff-main span {
   font-size: 12px;
-  color: #666;
+  color: var(--tt-muted);
 }
 
 .tt-actions {
@@ -163,13 +300,19 @@
 }
 
 .tt-mini-btn {
-  border: 1px solid #ccc;
+  border: 1px solid var(--tt-border);
   background: #fff;
-  color: #333;
+  color: #2d4a67;
   border-radius: 7px;
   padding: 6px 10px;
   font-size: 12px;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tt-mini-btn:hover {
+  border-color: var(--tt-primary);
+  background: var(--tt-primary-soft);
 }
 
 .tt-mini-btn-danger {
@@ -183,37 +326,51 @@
 }
 
 .tt-container {
-  padding: 24px;
-  max-width: 1200px;
+  padding: 20px;
   margin: 0 auto;
+  background: #fff;
+  border: 1px solid var(--tt-border);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
 }
 
 .tt-header {
-  text-align: center;
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.tt-header h2 {
+  margin: 0;
+  font-size: 22px;
+  color: var(--tt-text);
 }
 
 .tt-hint {
-  color: #888;
+  margin: 0;
+  color: var(--tt-muted);
   font-size: 13px;
 }
 
 .tt-save-banner {
   margin: 12px 0 16px;
-  border: 1.5px solid #ffcc80;
-  background: #fff8e1;
+  border: 1px solid var(--tt-border);
+  background: #f7fbff;
   border-radius: 10px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  color: #2d4a67;
 }
 
 .tt-notification {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: 18px;
+  right: 18px;
   padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;
@@ -223,7 +380,7 @@
 }
 
 .tt-notification-success {
-  background: #43a047;
+  background: var(--tt-primary);
 }
 
 .tt-notification-delete {
@@ -232,6 +389,8 @@
 
 .tt-scroll {
   overflow-x: auto;
+  border: 1px solid var(--tt-border);
+  border-radius: 12px;
 }
 
 .tt-table {
@@ -244,82 +403,90 @@
 
 .tt-table th,
 .tt-table td {
-  border: 1.5px solid #d0d4e4;
+  border: 1px solid #dbe7f4;
   padding: 10px 6px;
   vertical-align: middle;
 }
 
 .tt-table thead tr {
-  background: #1a1a2e;
-  color: #fff;
+  background: #f6faff;
+  color: #26445f;
+}
+
+.tt-table thead th {
+  font-weight: 700;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .tt-day-col {
-  width: 100px;
+  width: 120px;
 }
 
 .tt-period-col {
-  min-width: 90px;
+  min-width: 98px;
 }
 
 .tt-break-col {
-  width: 60px;
-  background: #2d2d4e;
+  width: 72px;
+  background: #eef5fd;
 }
 
 .tt-day-cell {
   font-weight: 700;
-  background: #f0f1f8;
-  color: #1a1a2e;
+  background: #f8fbff;
+  color: var(--tt-text);
   text-align: left;
-  padding-left: 12px;
+  padding-left: 14px;
 }
 
 .tt-cell {
   cursor: pointer;
   position: relative;
+  transition: background 0.2s ease;
 }
 
 .tt-cell:hover {
-  background: #e3f2fd;
+  background: #edf6ff;
 }
 
 .tt-cell-empty {
-  background: #fafafa;
+  background: #fcfdff;
 }
 
 .tt-cell-lab {
-  background: #fff3e0;
+  background: #f7fbff;
 }
 
 .tt-cell-subject {
   font-weight: 700;
   font-size: 13px;
-  color: #1a1a2e;
+  color: var(--tt-text);
 }
 
 .tt-cell-staff {
   font-size: 11px;
-  color: #555;
+  color: var(--tt-muted);
 }
 
 .tt-cell-dirty {
   margin-top: 3px;
   font-size: 10px;
-  color: #e65100;
+  color: #b36200;
   font-weight: 700;
   text-transform: uppercase;
 }
 
 .tt-plus {
   font-size: 20px;
-  color: #bbb;
+  color: #99b8d6;
 }
 
 .tt-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(13, 24, 36, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -328,10 +495,12 @@
 
 .tt-modal {
   background: #fff;
-  border-radius: 12px;
+  border: 1px solid var(--tt-border);
+  border-radius: 14px;
   padding: 28px 32px;
   width: 420px;
   max-width: 90vw;
+  box-shadow: 0 10px 32px rgba(8, 24, 45, 0.2);
 }
 
 .tt-modal-info {
@@ -342,8 +511,8 @@
 }
 
 .tt-badge {
-  background: #e8eaf6;
-  color: #3949ab;
+  background: var(--tt-primary-soft);
+  color: var(--tt-primary);
   padding: 4px 12px;
   border-radius: 16px;
   font-size: 13px;
@@ -366,9 +535,13 @@
 }
 
 .tt-modal-save {
-  background: #3949ab;
+  background: var(--tt-primary);
   color: #fff;
   flex: 1;
+}
+
+.tt-modal-save:hover {
+  background: var(--tt-primary-strong);
 }
 
 .tt-modal-delete {
@@ -379,4 +552,46 @@
 .tt-modal-cancel {
   background: #e0e0e0;
   color: #333;
+}
+
+@media (max-width: 900px) {
+  .tt-shell-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 14px 20px;
+  }
+
+  .tt-shell-header__right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .tt-info-bar {
+    padding: 10px 20px;
+  }
+
+  .tt-main {
+    padding: 16px;
+  }
+
+  .tt-container {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .tt-form {
+    padding: 14px;
+  }
+
+  .tt-field,
+  .tt-field input,
+  .tt-field select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .tt-save-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
